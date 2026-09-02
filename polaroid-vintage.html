@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Insta Polaroid</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&family=Permanent+Marker&display=swap');
+
+  :root {
+    --bg: #0B0B0A;
+    --bg-deep: #050505;
+    --panel: #181715;
+    --panel-raise: #201F1C;
+    --ink: #EDEBE3;
+    --muted: #9C998F;
+    --line: rgba(237,235,227,0.14);
+    --accent: #B23A3A;
+    --accent-bright: #CC4A4A;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Mono', monospace;
+    min-height: 100vh;
+  }
+
+  body {
+    background-image:
+      radial-gradient(circle at 10% 10%, rgba(255,255,255,0.03), transparent 40%),
+      radial-gradient(circle at 90% 85%, rgba(178,58,58,0.05), transparent 45%);
+  }
+
+  .wrap {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 20px;
+    margin-bottom: 44px;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(34px, 5vw, 54px);
+    letter-spacing: 2px;
+    margin: 0;
+    line-height: 0.95;
+    color: var(--ink);
+  }
+
+  h1 span {
+    display: block;
+    font-size: 0.28em;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--accent-bright);
+    letter-spacing: 3px;
+    margin-top: 8px;
+    text-transform: none;
+  }
+
+  .meta {
+    font-size: 12.5px;
+    color: var(--muted);
+    max-width: 230px;
+    text-align: right;
+    line-height: 1.6;
+  }
+
+  main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+    align-items: start;
+  }
+
+  @media (max-width: 800px) {
+    main { grid-template-columns: 1fr; gap: 40px; }
+    .meta { text-align: left; }
+    header { flex-direction: column; align-items: flex-start; }
+  }
+
+  .panel-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--accent-bright);
+    margin-bottom: 14px;
+    letter-spacing: 1.5px;
+  }
+
+  .dropzone {
+    border: 1.5px dashed var(--line);
+    border-radius: 2px;
+    padding: 40px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+    background: var(--panel);
+  }
+
+  .dropzone:hover, .dropzone.dragover {
+    border-color: var(--accent-bright);
+    background: var(--panel-raise);
+  }
+
+  .dropzone p {
+    margin: 0 0 4px;
+    font-size: 14.5px;
+    color: var(--ink);
+  }
+
+  .dropzone .sub {
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+
+  .dropzone input { display: none; }
+
+  .icon-camera {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 14px;
+    color: var(--muted);
+  }
+
+  .controls {
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .control-row label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12.5px;
+    margin-bottom: 7px;
+    color: var(--muted);
+  }
+
+  .control-row .val {
+    color: var(--accent-bright);
+    font-weight: 600;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 3px;
+    background: var(--line);
+    outline: none;
+  }
+
+  input[type="range"]:hover { background: rgba(237,235,227,0.24); }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent-bright);
+    cursor: pointer;
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 0 1px var(--accent-bright);
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent-bright);
+    cursor: pointer;
+    border: 2px solid var(--bg);
+  }
+
+  .caption-input {
+    width: 100%;
+    padding: 10px 2px;
+    font-family: 'Times New Roman', cursive;
+    font-size: 19px;
+    border: none;
+    border-bottom: 1.5px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    outline: none;
+  }
+
+  .caption-input::placeholder {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+
+  .toggle-row {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+
+  .toggle {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12.5px;
+    color: var(--muted);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .toggle input { accent-color: var(--accent-bright); width: 15px; height: 15px; }
+
+  .btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.6px;
+    padding: 13px 22px;
+    background: var(--accent);
+    color: var(--ink);
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 6px;
+    transition: background 0.15s ease;
+  }
+
+  .btn:hover { background: var(--accent-bright); }
+
+  .btn:disabled {
+    background: var(--panel-raise);
+    color: var(--muted);
+    cursor: not-allowed;
+  }
+
+  .btn.secondary {
+    background: transparent;
+    color: var(--ink);
+    border: 1.5px solid var(--line);
+  }
+
+  .btn.secondary:hover {
+    background: var(--panel-raise);
+    border-color: var(--muted);
+  }
+
+  .stage {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 420px;
+    padding-top: 8px;
+  }
+
+  .film-shell {
+    position: relative;
+    filter: drop-shadow(0 18px 34px rgba(0,0,0,0.55));
+  }
+
+  canvas#outputCanvas {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    background: var(--bg-deep);
+    cursor: grab;
+    touch-action: none;
+  }
+
+  canvas#outputCanvas.dragging { cursor: grabbing; }
+
+  .recenter-link {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+    font-size: 11.5px;
+    color: var(--accent-bright);
+    text-decoration: underline;
+    cursor: pointer;
+    opacity: 0.85;
+  }
+
+  canvas#outputCanvas.tilted {
+  transform: rotate(-3deg);
+  transition: transform 0.2s ease;
+  }
+  .recenter-link:hover { opacity: 1; }
+
+  .empty-state {
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    padding-top: 120px;
+    max-width: 240px;
+  }
+
+  footer {
+    margin-top: 64px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    font-size: 11.5px;
+    color: var(--muted);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Insta Polaroid <span>BY GENESIS</span></h1>
+    <div class="meta">Upload any photo and develop it into a single black-and-white film frame, sprocket holes and all.</div>
+  </header>
+
+  <main>
+    <div>
+      <div class="panel-label">LOAD FILM</div>
+      <div class="dropzone" id="dropzone">
+        <svg class="icon-camera" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6">
+          <rect x="4" y="12" width="40" height="28" rx="2"/>
+          <circle cx="24" cy="26" r="8"/>
+          <path d="M16 12l3-5h10l3 5"/>
+          <circle cx="36" cy="18" r="1.5" fill="currentColor"/>
+        </svg>
+        <p>Drop an image here, or click to choose one</p>
+        <div class="sub">JPG, PNG, or WEBP</div>
+        <input type="file" id="fileInput" accept="image/*">
+      </div>
+
+      <div class="controls">
+        <div class="panel-label" style="margin-top:6px;">DEVELOP</div>
+
+        <div class="control-row">
+          <label>Fade <span class="val" id="fadeVal">55%</span></label>
+          <input type="range" id="fadeSlider" min="0" max="100" value="55">
+        </div>
+
+        <div class="control-row">
+          <label>Contrast <span class="val" id="contrastVal">60%</span></label>
+          <input type="range" id="contrastSlider" min="0" max="100" value="60">
+        </div>
+
+        <div class="control-row">
+          <label>Grain <span class="val" id="grainVal">40%</span></label>
+          <input type="range" id="grainSlider" min="0" max="100" value="40">
+        </div>
+
+        <div class="control-row">
+          <label>Frame size <span class="val" id="photoSizeVal">100%</span></label>
+          <input type="range" id="photoSizeSlider" min="55" max="100" value="100">
+        </div>
+
+        <div class="control-row">
+          <label>Frame height <span class="val" id="photoHeightVal">66%</span></label>
+          <input type="range" id="photoHeightSlider" min="50" max="160" value="66">
+        </div>
+
+        <div class="control-row">
+          <label>Zoom <span class="val" id="zoomVal">100%</span></label>
+          <input type="range" id="zoomSlider" min="100" max="250" value="100">
+        </div>
+
+        <div class="control-row">
+          <label>Old Effect<span class="val" id="oldVal">0%</span></label>
+          <input type="range" id="oldSlider" min="0" max="100" value="0">
+        </div>
+
+        <div class="toggle-row">
+          <label class="toggle"><input type="checkbox" id="vignetteToggle" checked> Vignette</label>
+          <label class="toggle"><input type="checkbox" id="lightleakToggle"> Halation glow</label>
+          <label class="toggle"><input type="checkbox" id="tiltToggle"> Tilt</label>
+        </div>
+
+        <div>
+          <div class="panel-label" style="margin-top:6px;">LABEL</div>
+          <input type="text" class="caption-input" id="captionInput" placeholder="grease-pencil note on the sleeve..." maxlength="40">
+        </div>
+
+        <button class="btn" id="downloadBtn" disabled>Download Frame</button>
+        <button class="btn secondary" id="resetBtn" style="display:none;">Load a Different Photo</button>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div id="emptyState" class="empty-state">
+        <svg class="icon-camera" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" style="margin-bottom:14px;">
+          <rect x="4" y="12" width="40" height="28" rx="2"/>
+          <circle cx="24" cy="26" r="8"/>
+        </svg>
+        Your developed frame will appear here once you load a photo.
+      </div>
+      <div class="film-shell" id="filmShell" style="display:none;">
+        <canvas id="outputCanvas"></canvas>
+        <div class="recenter-link" id="recenterLink">drag photo to reposition · click to recenter</div>
+      </div>
+    </div>
+  </main>
+
+  <footer>Everything happens in your browser — nothing is uploaded anywhere.</footer>
+</div>
+
+<script>
+(function() {
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('fileInput');
+  const canvas = document.getElementById('outputCanvas');
+  const ctx = canvas.getContext('2d');
+  const filmShell = document.getElementById('filmShell');
+  const emptyState = document.getElementById('emptyState');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const captionInput = document.getElementById('captionInput');
+
+  const fadeSlider = document.getElementById('fadeSlider');
+  const contrastSlider = document.getElementById('contrastSlider');
+  const grainSlider = document.getElementById('grainSlider');
+  const fadeVal = document.getElementById('fadeVal');
+  const contrastVal = document.getElementById('contrastVal');
+  const grainVal = document.getElementById('grainVal');
+  const photoSizeSlider = document.getElementById('photoSizeSlider');
+  const photoSizeVal = document.getElementById('photoSizeVal');
+  const photoHeightSlider = document.getElementById('photoHeightSlider');
+  const photoHeightVal = document.getElementById('photoHeightVal');
+  const zoomSlider = document.getElementById('zoomSlider');
+  const zoomVal = document.getElementById('zoomVal');
+  const oldSlider = document.getElementById('oldSlider');
+  const oldVal = document.getElementById('oldVal');
+  const vignetteToggle = document.getElementById('vignetteToggle');
+  const lightleakToggle = document.getElementById('lightleakToggle');
+  const tiltToggle = document.getElementById('tiltToggle');
+
+  let sourceImage = null;
+  let panFracX = 0.5;
+  let panFracY = 0.5;
+  let lastLayout = null;
+  let frameNumber = '14A';
+
+  // ---------- File loading ----------
+  dropzone.addEventListener('click', () => fileInput.click());
+  dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+  dropzone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropzone.classList.remove('dragover');
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', e => {
+    if (e.target.files && e.target.files[0]) loadFile(e.target.files[0]);
+  });
+
+  function loadFile(file) {
+    if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = evt => {
+      const img = new Image();
+      img.onload = () => {
+        sourceImage = img;
+        panFracX = 0.5;
+        panFracY = 0.5;
+        zoomSlider.value = 100;
+        zoomVal.textContent = '100%';
+        oldSlider.value = 0;
+        oldVal.textContent = '0%';
+        frameNumber = String(Math.floor(Math.random() * 36) + 1).padStart(2, '0') + 'A';
+
+        // match the frame's proportions to the photo's orientation, but pull toward square
+        const naturalRatio = (img.height / img.width) * 100;
+        const squaredRatio = Math.round(naturalRatio + (100 - naturalRatio) * 0.6);
+        const minRatio = parseInt(photoHeightSlider.min, 10);
+        const maxRatio = parseInt(photoHeightSlider.max, 10);
+        const clampedRatio = Math.min(maxRatio, Math.max(minRatio, squaredRatio));
+        photoHeightSlider.value = clampedRatio;
+        photoHeightVal.textContent = clampedRatio + '%';
+
+        emptyState.style.display = 'none';
+        filmShell.style.display = 'block';
+        downloadBtn.disabled = false;
+        resetBtn.style.display = 'block';
+        render();
+      };
+      img.src = evt.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  resetBtn.addEventListener('click', () => {
+    sourceImage = null;
+    fileInput.value = '';
+    captionInput.value = '';
+    zoomSlider.value = 100;
+    zoomVal.textContent = '100%';
+    oldSlider.value = 0;
+    oldVal.textContent = '0%';
+    filmShell.style.display = 'none';
+    emptyState.style.display = 'block';
+    downloadBtn.disabled = true;
+    resetBtn.style.display = 'none';
+  });
+
+  // ---------- Controls ----------
+  [fadeSlider, contrastSlider, grainSlider, photoSizeSlider, photoHeightSlider, zoomSlider, oldSlider].forEach(s => s.addEventListener('input', () => {
+    fadeVal.textContent = fadeSlider.value + '%';
+    contrastVal.textContent = contrastSlider.value + '%';
+    grainVal.textContent = grainSlider.value + '%';
+    photoSizeVal.textContent = photoSizeSlider.value + '%';
+    photoHeightVal.textContent = photoHeightSlider.value + '%';
+    zoomVal.textContent = zoomSlider.value + '%';
+    oldVal.textContent = oldSlider.value + '%';
+    render();
+  }));
+  vignetteToggle.addEventListener('change', render);
+  lightleakToggle.addEventListener('change', render);
+  tiltToggle.addEventListener('change', render);
+  captionInput.addEventListener('input', render);
+  tiltToggle.addEventListener('change', () => {
+  canvas.classList.toggle('tilted', tiltToggle.checked);
+});
+
+  // ---------- Rendering pipeline ----------
+  const FRAME_W = 900;
+  const SIDE_MARGIN = 26;
+  const SPROCKET_H = 34;
+  const CAPTION_H = 215;
+  const PHOTO_AREA_W = FRAME_W - SIDE_MARGIN * 2;
+  const HOLE_W = 20, HOLE_H = 14, HOLE_GAP = 16;
+
+  function render() {
+    if (!sourceImage) return;
+
+    const sizeRatio = photoSizeSlider.value / 100;
+    const heightRatio = photoHeightSlider.value / 100;
+    const PHOTO_W = Math.round(PHOTO_AREA_W * sizeRatio);
+    const PHOTO_H = Math.round(PHOTO_W * heightRatio);
+
+    const FRAME_H = SPROCKET_H + PHOTO_H + SPROCKET_H + CAPTION_H;
+    canvas.width = FRAME_W;
+    canvas.height = FRAME_H;
+
+    // 1. Base frame background
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, FRAME_W, FRAME_H);
+
+    // 2. (sprocket hole strips removed)
+
+    // 3. Photo, cover-cropped and pannable
+    const photoX = SIDE_MARGIN + (PHOTO_AREA_W - PHOTO_W) / 2;
+    const photoY = SPROCKET_H;
+
+    const photoCanvas = document.createElement('canvas');
+    photoCanvas.width = PHOTO_W;
+    photoCanvas.height = PHOTO_H;
+    const pctx = photoCanvas.getContext('2d');
+
+    const iw = sourceImage.width, ih = sourceImage.height;
+    const zoomFactor = zoomSlider.value / 100;
+    const scale = Math.max(PHOTO_W / iw, PHOTO_H / ih) * zoomFactor;
+    const dw = iw * scale, dh = ih * scale;
+    const slackX = Math.max(0, dw - PHOTO_W);
+    const slackY = Math.max(0, dh - PHOTO_H);
+    const dx = -slackX * panFracX;
+    const dy = -slackY * panFracY;
+    pctx.drawImage(sourceImage, dx, dy, dw, dh);
+
+    lastLayout = { PHOTO_W, PHOTO_H, slackX, slackY };
+
+    applyFilmFilter(pctx, PHOTO_W, PHOTO_H);
+    addAgedTexture(pctx, PHOTO_W, PHOTO_H, oldSlider.value / 100);
+    ctx.drawImage(photoCanvas, photoX, photoY);
+
+    ctx.strokeStyle = 'rgba(10,10,9,0.25)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(photoX + 0.5, photoY + 0.5, PHOTO_W - 1, PHOTO_H - 1);
+
+    // 4. Caption, grease-pencil style, on the bottom white margin
+    const caption = captionInput.value.trim();
+    if (caption) {
+      ctx.fillStyle = '#0A0A09';
+      ctx.font = '25px "Times New Roman", cursive';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const capY = SPROCKET_H + PHOTO_H + SPROCKET_H + CAPTION_H / 2;
+      ctx.fillText(caption, FRAME_W / 2, capY, PHOTO_AREA_W);
+    }
+  }
+
+  function drawSprocketStrip(centerY) {
+    const usable = FRAME_W - SIDE_MARGIN;
+    const count = Math.floor(usable / (HOLE_W + HOLE_GAP));
+    const totalW = count * HOLE_W + (count - 1) * HOLE_GAP;
+    let startX = (FRAME_W - totalW) / 2;
+    ctx.fillStyle = '#050505';
+    for (let i = 0; i < count; i++) {
+      const x = startX + i * (HOLE_W + HOLE_GAP);
+      roundRect(x, centerY - HOLE_H / 2, HOLE_W, HOLE_H, 3);
+      ctx.fill();
+    }
+  }
+
+  function roundRect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function applyFilmFilter(pctx, w, h) {
+    const fade = fadeSlider.value / 100;
+    const contrast = contrastSlider.value / 100;
+    const grain = grainSlider.value / 100;
+
+    const imgData = pctx.getImageData(0, 0, w, h);
+    const d = imgData.data;
+
+    const cx = w / 2, cy = h / 2;
+    const maxDist = Math.sqrt(cx * cx + cy * cy);
+    const contrastFactor = 1 + contrast * 0.9;
+    const liftAmt = 16 * fade;
+    const compress = 1 - 0.16 * fade;
+
+    for (let i = 0; i < d.length; i += 4) {
+      let x, y, vig;
+      if (vignetteToggle.checked) {
+        x = (i / 4) % w;
+        y = Math.floor((i / 4) / w);
+        const dist = Math.sqrt((x - cx) * (x - cx) + (y - cy) * (y - cy)) / maxDist;
+        vig = 1 - Math.pow(dist, 2.2) * 0.55 * (0.5 + fade * 0.5);
+      }
+      const grainAmt = grain > 0 ? (Math.random() - 0.5) * grain * 60 : 0;
+
+      for (let c = 0; c < 3; c++) {
+        let v = d[i + c];
+        // contrast push around midtone
+        v = (v - 128) * contrastFactor + 128;
+        // faded film look: lift blacks, compress whites
+        v = v * compress + liftAmt;
+        // grain (shared across channels so it reads as film grain, not color noise)
+        v += grainAmt;
+        // vignette
+        if (vignetteToggle.checked) v *= vig;
+        d[i + c] = clamp(v);
+      }
+    }
+
+    pctx.putImageData(imgData, 0, 0);
+
+    // halation glow — soft white bloom rather than a colored light leak,
+    // to stay true to a black & white stock
+    if (lightleakToggle.checked) {
+      const grad = pctx.createRadialGradient(w * 0.8, h * 0.15, 0, w * 0.8, h * 0.15, w * 0.85);
+      grad.addColorStop(0, 'rgba(255,255,255,0.35)');
+      grad.addColorStop(0.4, 'rgba(255,255,255,0.14)');
+      grad.addColorStop(1, 'rgba(255,255,255,0)');
+      pctx.globalCompositeOperation = 'screen';
+      pctx.fillStyle = grad;
+      pctx.fillRect(0, 0, w, h);
+      pctx.globalCompositeOperation = 'source-over';
+    }
+  }
+
+  function addAgedTexture(pctx, w, h, intensity) {
+    if (intensity <= 0) return;
+    pctx.save();
+
+    // vertical scratches, like worn film/paper
+    const scratchCount = Math.round(intensity * 18);
+    for (let i = 0; i < scratchCount; i++) {
+      const x = Math.random() * w;
+      const jitter = (Math.random() - 0.5) * 14;
+      const isLight = Math.random() < 0.6;
+      const alpha = (0.06 + Math.random() * 0.16) * intensity;
+      pctx.strokeStyle = isLight ? `rgba(255,255,255,${alpha})` : `rgba(20,18,15,${alpha})`;
+      pctx.lineWidth = Math.random() < 0.7 ? 1 : 2;
+      pctx.beginPath();
+      pctx.moveTo(x, 0);
+      pctx.lineTo(x + jitter, h);
+      pctx.stroke();
+    }
+
+    // dust specks and small marks
+    const dustCount = Math.round(intensity * 70);
+    for (let i = 0; i < dustCount; i++) {
+      const x = Math.random() * w;
+      const y = Math.random() * h;
+      const r = Math.random() * 1.6 + 0.4;
+      const alpha = (0.12 + Math.random() * 0.3) * intensity;
+      pctx.fillStyle = Math.random() < 0.5
+        ? `rgba(20,18,15,${alpha})`
+        : `rgba(255,255,255,${alpha})`;
+      pctx.beginPath();
+      pctx.arc(x, y, r, 0, Math.PI * 2);
+      pctx.fill();
+    }
+
+    // faint mottled patches, like aged paper staining
+    const patchCount = Math.round(intensity * 5);
+    for (let i = 0; i < patchCount; i++) {
+      const x = Math.random() * w;
+      const y = Math.random() * h;
+      const r = 20 + Math.random() * 50;
+      const alpha = 0.03 + Math.random() * 0.05 * intensity;
+      const grad = pctx.createRadialGradient(x, y, 0, x, y, r);
+      grad.addColorStop(0, `rgba(90,70,45,${alpha})`);
+      grad.addColorStop(1, 'rgba(90,70,45,0)');
+      pctx.fillStyle = grad;
+      pctx.fillRect(0, 0, w, h);
+    }
+
+    pctx.restore();
+  }
+
+  function clamp(v) { return v < 0 ? 0 : v > 255 ? 255 : v; }
+
+  // ---------- Drag to reposition ----------
+  let isDragging = false;
+  let dragStartClientX = 0;
+  let dragStartClientY = 0;
+  let dragStartFracX = 0.5;
+  let dragStartFracY = 0.5;
+
+  canvas.addEventListener('pointerdown', e => {
+    if (!sourceImage || !lastLayout) return;
+    isDragging = true;
+    canvas.classList.add('dragging');
+    canvas.setPointerCapture(e.pointerId);
+    dragStartClientX = e.clientX;
+    dragStartClientY = e.clientY;
+    dragStartFracX = panFracX;
+    dragStartFracY = panFracY;
+  });
+
+  canvas.addEventListener('pointermove', e => {
+    if (!isDragging || !lastLayout) return;
+    const rect = canvas.getBoundingClientRect();
+    const ratioX = canvas.width / rect.width;
+    const ratioY = canvas.height / rect.height;
+    const deltaCanvasX = (e.clientX - dragStartClientX) * ratioX;
+    const deltaCanvasY = (e.clientY - dragStartClientY) * ratioY;
+
+    const { slackX, slackY } = lastLayout;
+    panFracX = slackX > 0 ? clamp01(dragStartFracX - deltaCanvasX / slackX) : 0.5;
+    panFracY = slackY > 0 ? clamp01(dragStartFracY - deltaCanvasY / slackY) : 0.5;
+    render();
+  });
+
+  function endDrag(e) {
+    if (!isDragging) return;
+    isDragging = false;
+    canvas.classList.remove('dragging');
+    if (e && e.pointerId !== undefined) {
+      try { canvas.releasePointerCapture(e.pointerId); } catch (err) {}
+    }
+  }
+  canvas.addEventListener('pointerup', endDrag);
+  canvas.addEventListener('pointercancel', endDrag);
+
+  function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+
+  document.getElementById('recenterLink').addEventListener('click', () => {
+    panFracX = 0.5;
+    panFracY = 0.5;
+    render();
+  });
+
+  // ---------- Download ----------
+  downloadBtn.addEventListener('click', () => {
+    const link = document.createElement('a');
+    link.download = 'contact-sheet-frame.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+})();
+</script>
+</body>
+</html>
