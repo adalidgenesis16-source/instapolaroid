@@ -438,7 +438,6 @@
         <div class="toggle-row">
           <label class="toggle"><input type="checkbox" id="vignetteToggle" checked> Vignette</label>
           <label class="toggle"><input type="checkbox" id="lightleakToggle"> Halation glow</label>
-          <label class="toggle"><input type="checkbox" id="tiltToggle"> Tilt</label>
         </div>
 
         <div>
@@ -497,7 +496,7 @@
   const oldVal = document.getElementById('oldVal');
   const vignetteToggle = document.getElementById('vignetteToggle');
   const lightleakToggle = document.getElementById('lightleakToggle');
-  const tiltToggle = document.getElementById('tiltToggle');
+
 
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(() => render());
