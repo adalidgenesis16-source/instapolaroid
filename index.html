@@ -668,13 +668,6 @@
       const capY = SPROCKET_H + PHOTO_H + SPROCKET_H + CAPTION_H / 2 - 6;
       ctx.fillText(caption, FRAME_W / 2, capY, PHOTO_AREA_W);
     }
-
-    // 5. Frame counter, stamped in the corner like a contact sheet
-    ctx.fillStyle = 'rgba(10,10,9,0.4)';
-    ctx.font = '600 12px "IBM Plex Mono", monospace';
-    ctx.textAlign = 'right';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillText(frameNumber, FRAME_W - SIDE_MARGIN, FRAME_H - 18);
   }
 
   function drawSprocketStrip(centerY) {
