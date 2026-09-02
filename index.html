@@ -719,7 +719,7 @@
     const caption = captionInput.value.trim();
     if (caption) {
       ctx.fillStyle = '#0A0A09';
-      ctx.font = '20px "Times New Roman", cursive';
+      ctx.font = '15px "Times New Roman", cursive';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       const capY = SPROCKET_H + PHOTO_H + SPROCKET_H + CAPTION_H / 2 - 6;
@@ -857,25 +857,55 @@
 
   function clamp(v) { return v < 0 ? 0 : v > 255 ? 255 : v; }
 
-  // ---------- Drag to reposition ----------
+  // ---------- Drag to reposition / pinch to zoom ----------
   let isDragging = false;
   let dragStartClientX = 0;
   let dragStartClientY = 0;
   let dragStartFracX = 0.5;
   let dragStartFracY = 0.5;
 
+  const activePointers = new Map();
+  let pinchStartDist = null;
+  let pinchStartZoom = 100;
+
   canvas.addEventListener('pointerdown', e => {
     if (!sourceImage || !lastLayout) return;
-    isDragging = true;
-    canvas.classList.add('dragging');
     canvas.setPointerCapture(e.pointerId);
-    dragStartClientX = e.clientX;
-    dragStartClientY = e.clientY;
-    dragStartFracX = panFracX;
-    dragStartFracY = panFracY;
+    activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (activePointers.size >= 2) {
+      // Second finger down: switch to pinch-zoom, cancel single-finger pan.
+      isDragging = false;
+      canvas.classList.remove('dragging');
+      const pts = Array.from(activePointers.values());
+      pinchStartDist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      pinchStartZoom = parseFloat(zoomSlider.value);
+    } else {
+      isDragging = true;
+      canvas.classList.add('dragging');
+      dragStartClientX = e.clientX;
+      dragStartClientY = e.clientY;
+      dragStartFracX = panFracX;
+      dragStartFracY = panFracY;
+    }
   });
 
   canvas.addEventListener('pointermove', e => {
+    if (activePointers.has(e.pointerId)) {
+      activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    }
+
+    if (activePointers.size >= 2 && pinchStartDist) {
+      const pts = Array.from(activePointers.values());
+      const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      const newZoom = Math.round(Math.min(250, Math.max(100, pinchStartZoom * (dist / pinchStartDist))));
+      zoomSlider.value = newZoom;
+      zoomVal.textContent = newZoom + '%';
+      setFill(zoomSlider);
+      requestRender();
+      return;
+    }
+
     if (!isDragging || !lastLayout) return;
     const rect = canvas.getBoundingClientRect();
     const ratioX = canvas.width / rect.width;
@@ -890,11 +920,14 @@
   });
 
   function endDrag(e) {
-    if (!isDragging) return;
-    isDragging = false;
-    canvas.classList.remove('dragging');
     if (e && e.pointerId !== undefined) {
+      activePointers.delete(e.pointerId);
       try { canvas.releasePointerCapture(e.pointerId); } catch (err) {}
+    }
+    if (activePointers.size < 2) pinchStartDist = null;
+    if (isDragging) {
+      isDragging = false;
+      canvas.classList.remove('dragging');
     }
   }
   canvas.addEventListener('pointerup', endDrag);
