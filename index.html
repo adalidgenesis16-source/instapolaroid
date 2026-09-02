@@ -106,6 +106,24 @@
     .stage { order: 1; }
     .meta { text-align: left; }
     header { flex-direction: column; align-items: flex-start; }
+
+    input[type="range"] {
+      height: 4px;
+      padding: 14px 0;
+      background-clip: content-box;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      width: 22px;
+      height: 22px;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 22px;
+      height: 22px;
+    }
+
+    .control-row { margin-bottom: -14px; }
   }
 
   .panel-label {
@@ -200,6 +218,8 @@
     border-radius: 2px;
     background: linear-gradient(to right, var(--accent-bright) 0%, var(--accent-bright) var(--fill, 50%), var(--line) var(--fill, 50%), var(--line) 100%);
     transition: background 0.06s linear;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
   }
 
   input[type="range"]::-webkit-slider-thumb {
@@ -889,11 +909,42 @@
   });
 
   // ---------- Download ----------
-  downloadBtn.addEventListener('click', () => {
-    const link = document.createElement('a');
-    link.download = 'contact-sheet-frame.png';
-    link.href = canvas.toDataURL('image/png');
-    link.click();
+  downloadBtn.addEventListener('click', async () => {
+    canvas.toBlob(async (blob) => {
+      if (!blob) return;
+      const file = new File([blob], 'contact-sheet-frame.png', { type: 'image/png' });
+
+      // Prefer native share sheet on mobile — this is what actually lets
+      // iOS/Android users save the image (the <a download> attribute is
+      // unreliable on mobile browsers, especially iOS Safari).
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: 'contact-sheet-frame.png' });
+          return;
+        } catch (err) {
+          if (err && err.name === 'AbortError') return; // user cancelled share sheet
+          // fall through to next method on other errors
+        }
+      }
+
+      const url = URL.createObjectURL(blob);
+
+      // Try the standard download attribute (works on desktop browsers).
+      const link = document.createElement('a');
+      link.download = 'contact-sheet-frame.png';
+      link.href = url;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      // On mobile browsers that ignore `download`, also open the image
+      // in a new tab as a fallback so the user can long-press → Save Image.
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        window.open(url, '_blank');
+      }
+
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+    }, 'image/png');
   });
 })();
 </script>
