@@ -593,7 +593,14 @@
       setFill(s);
       render();
     });
- 
+  });
+  vignetteToggle.addEventListener('change', render);
+  lightleakToggle.addEventListener('change', render);
+  captionInput.addEventListener('input', render);
+  tiltToggle.addEventListener('change', () => {
+    canvas.classList.toggle('tilted', tiltToggle.checked);
+    render();
+  });
 
   // ---------- Rendering pipeline ----------
   const FRAME_W = 440;
