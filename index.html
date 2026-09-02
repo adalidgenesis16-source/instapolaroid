@@ -10,13 +10,14 @@
   :root {
     --bg: #0B0B0A;
     --bg-deep: #050505;
-    --panel: #181715;
+    --panel: #151412;
     --panel-raise: #201F1C;
     --ink: #EDEBE3;
-    --muted: #9C998F;
-    --line: rgba(237,235,227,0.14);
+    --muted: #8F8C82;
+    --line: rgba(237,235,227,0.12);
     --accent: #B23A3A;
     --accent-bright: #CC4A4A;
+    --safelight: rgba(204,74,74,0.16);
   }
 
   * { box-sizing: border-box; }
@@ -33,13 +34,25 @@
   body {
     background-image:
       radial-gradient(circle at 10% 10%, rgba(255,255,255,0.03), transparent 40%),
-      radial-gradient(circle at 90% 85%, rgba(178,58,58,0.05), transparent 45%);
+      radial-gradient(circle at 90% 85%, var(--safelight), transparent 45%);
   }
 
   .wrap {
-    max-width: 1060px;
+    max-width: 1120px;
     margin: 0 auto;
-    padding: 48px 24px 80px;
+    padding: 40px 24px 80px;
+  }
+
+  .sprocket-rail {
+    height: 9px;
+    margin-bottom: 34px;
+    opacity: 0.55;
+    background-image: repeating-linear-gradient(
+      to right,
+      var(--line) 0, var(--line) 13px,
+      transparent 13px, transparent 23px
+    );
+    border-radius: 2px;
   }
 
   header {
@@ -82,13 +95,15 @@
 
   main {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 56px;
+    grid-template-columns: 340px 1fr;
+    gap: 64px;
     align-items: start;
   }
 
   @media (max-width: 800px) {
-    main { grid-template-columns: 1fr; gap: 40px; }
+    main { grid-template-columns: 1fr; gap: 36px; }
+    main > div:first-child { order: 2; }
+    .stage { order: 1; }
     .meta { text-align: left; }
     header { flex-direction: column; align-items: flex-start; }
   }
@@ -97,9 +112,24 @@
     font-family: 'IBM Plex Mono', monospace;
     font-size: 12.5px;
     font-weight: 600;
-    color: var(--accent-bright);
+    color: var(--ink);
     margin-bottom: 14px;
     letter-spacing: 1.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .panel-label::before {
+    content: attr(data-step);
+    color: var(--accent-bright);
+  }
+
+  .panel-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--line);
   }
 
   .dropzone {
@@ -115,6 +145,10 @@
   .dropzone:hover, .dropzone.dragover {
     border-color: var(--accent-bright);
     background: var(--panel-raise);
+  }
+
+  .dropzone:hover .icon-camera, .dropzone.dragover .icon-camera {
+    color: var(--accent-bright);
   }
 
   .dropzone p {
@@ -135,6 +169,7 @@
     height: 40px;
     margin: 0 auto 14px;
     color: var(--muted);
+    transition: color 0.15s ease;
   }
 
   .controls {
@@ -161,11 +196,9 @@
     -webkit-appearance: none;
     width: 100%;
     height: 3px;
-    background: var(--line);
     outline: none;
+    background: linear-gradient(to right, var(--accent-bright) 0%, var(--accent-bright) var(--fill, 50%), var(--line) var(--fill, 50%), var(--line) 100%);
   }
-
-  input[type="range"]:hover { background: rgba(237,235,227,0.24); }
 
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
@@ -235,7 +268,11 @@
     cursor: pointer;
     width: 100%;
     margin-top: 6px;
-    transition: background 0.15s ease;
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .btn:not(:disabled):not(.secondary):hover {
+    box-shadow: 0 0 0 1px var(--accent-bright), 0 0 22px var(--safelight);
   }
 
   .btn:hover { background: var(--accent-bright); }
@@ -258,11 +295,30 @@
   }
 
   .stage {
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: flex-start;
     min-height: 420px;
     padding-top: 8px;
+  }
+
+  .stage::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    width: 640px;
+    height: 640px;
+    transform: translateX(-50%);
+    background: radial-gradient(circle, var(--safelight), transparent 62%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .film-shell, .empty-state {
+    position: relative;
+    z-index: 1;
   }
 
   .film-shell {
@@ -319,6 +375,8 @@
 <body>
 <div class="wrap">
 
+  <div class="sprocket-rail"></div>
+
   <header>
     <h1>Insta Polaroid <span>BY GENESIS</span></h1>
     <div class="meta">Upload any photo and develop it into a single black-and-white film frame, sprocket holes and all.</div>
@@ -326,7 +384,7 @@
 
   <main>
     <div>
-      <div class="panel-label">LOAD FILM</div>
+      <div class="panel-label" data-step="01">LOAD FILM</div>
       <div class="dropzone" id="dropzone">
         <svg class="icon-camera" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6">
           <rect x="4" y="12" width="40" height="28" rx="2"/>
@@ -340,7 +398,7 @@
       </div>
 
       <div class="controls">
-        <div class="panel-label" style="margin-top:6px;">DEVELOP</div>
+        <div class="panel-label" data-step="02">DEVELOP</div>
 
         <div class="control-row">
           <label>Fade <span class="val" id="fadeVal">55%</span></label>
@@ -384,8 +442,8 @@
         </div>
 
         <div>
-          <div class="panel-label" style="margin-top:6px;">LABEL</div>
-          <input type="text" class="caption-input" id="captionInput" placeholder="write your caption here..." maxlength="40">
+          <div class="panel-label" data-step="03">LABEL</div>
+          <input type="text" class="caption-input" id="captionInput" placeholder="grease-pencil note on the sleeve..." maxlength="40">
         </div>
 
         <button class="btn" id="downloadBtn" disabled>Download Frame</button>
@@ -441,6 +499,10 @@
   const lightleakToggle = document.getElementById('lightleakToggle');
   const tiltToggle = document.getElementById('tiltToggle');
 
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => render());
+  }
+
   let sourceImage = null;
   let panFracX = 0.5;
   let panFracY = 0.5;
@@ -483,6 +545,7 @@
         const clampedRatio = Math.min(maxRatio, Math.max(minRatio, squaredRatio));
         photoHeightSlider.value = clampedRatio;
         photoHeightVal.textContent = clampedRatio + '%';
+        [zoomSlider, oldSlider, photoHeightSlider].forEach(setFill);
 
         emptyState.style.display = 'none';
         filmShell.style.display = 'block';
@@ -503,6 +566,7 @@
     zoomVal.textContent = '100%';
     oldSlider.value = 0;
     oldVal.textContent = '0%';
+    [zoomSlider, oldSlider].forEach(setFill);
     filmShell.style.display = 'none';
     emptyState.style.display = 'block';
     downloadBtn.disabled = true;
@@ -510,23 +574,34 @@
   });
 
   // ---------- Controls ----------
-  [fadeSlider, contrastSlider, grainSlider, photoSizeSlider, photoHeightSlider, zoomSlider, oldSlider].forEach(s => s.addEventListener('input', () => {
-    fadeVal.textContent = fadeSlider.value + '%';
-    contrastVal.textContent = contrastSlider.value + '%';
-    grainVal.textContent = grainSlider.value + '%';
-    photoSizeVal.textContent = photoSizeSlider.value + '%';
-    photoHeightVal.textContent = photoHeightSlider.value + '%';
-    zoomVal.textContent = zoomSlider.value + '%';
-    oldVal.textContent = oldSlider.value + '%';
-    render();
-  }));
+  const allSliders = [fadeSlider, contrastSlider, grainSlider, photoSizeSlider, photoHeightSlider, zoomSlider, oldSlider];
+
+  function setFill(s) {
+    const pct = ((s.value - s.min) / (s.max - s.min)) * 100;
+    s.style.setProperty('--fill', pct + '%');
+  }
+
+  allSliders.forEach(s => {
+    setFill(s);
+    s.addEventListener('input', () => {
+      fadeVal.textContent = fadeSlider.value + '%';
+      contrastVal.textContent = contrastSlider.value + '%';
+      grainVal.textContent = grainSlider.value + '%';
+      photoSizeVal.textContent = photoSizeSlider.value + '%';
+      photoHeightVal.textContent = photoHeightSlider.value + '%';
+      zoomVal.textContent = zoomSlider.value + '%';
+      oldVal.textContent = oldSlider.value + '%';
+      setFill(s);
+      render();
+    });
+  });
   vignetteToggle.addEventListener('change', render);
   lightleakToggle.addEventListener('change', render);
-  tiltToggle.addEventListener('change', render);
   captionInput.addEventListener('input', render);
   tiltToggle.addEventListener('change', () => {
-  canvas.classList.toggle('tilted', tiltToggle.checked);
-});
+    canvas.classList.toggle('tilted', tiltToggle.checked);
+    render();
+  });
 
   // ---------- Rendering pipeline ----------
   const FRAME_W = 900;
@@ -587,12 +662,19 @@
     const caption = captionInput.value.trim();
     if (caption) {
       ctx.fillStyle = '#0A0A09';
-      ctx.font = '25px "Times New Roman", cursive';
+      ctx.font = '28px "Permanent Marker", cursive';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      const capY = SPROCKET_H + PHOTO_H + SPROCKET_H + CAPTION_H / 2;
+      const capY = SPROCKET_H + PHOTO_H + SPROCKET_H + CAPTION_H / 2 - 6;
       ctx.fillText(caption, FRAME_W / 2, capY, PHOTO_AREA_W);
     }
+
+    // 5. Frame counter, stamped in the corner like a contact sheet
+    ctx.fillStyle = 'rgba(10,10,9,0.4)';
+    ctx.font = '600 12px "IBM Plex Mono", monospace';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText('FRM ' + frameNumber, FRAME_W - SIDE_MARGIN, FRAME_H - 18);
   }
 
   function drawSprocketStrip(centerY) {
