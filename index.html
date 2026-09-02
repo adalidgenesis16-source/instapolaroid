@@ -438,11 +438,12 @@
         <div class="toggle-row">
           <label class="toggle"><input type="checkbox" id="vignetteToggle" checked> Vignette</label>
           <label class="toggle"><input type="checkbox" id="lightleakToggle"> Halation glow</label>
+          <label class="toggle"><input type="checkbox" id="tiltToggle"> Tilt</label>
         </div>
 
         <div>
           <div class="panel-label" data-step="03">LABEL</div>
-          <input type="text" class="caption-input" id="captionInput" placeholder="write your caption here..." maxlength="40">
+          <input type="text" class="caption-input" id="captionInput" placeholder="grease-pencil note on the sleeve..." maxlength="40">
         </div>
 
         <button class="btn" id="downloadBtn" disabled>Download Frame</button>
@@ -465,7 +466,7 @@
     </div>
   </main>
 
-  <footer>Collect moments not things.</footer>
+  <footer>Everything happens in your browser — nothing is uploaded anywhere.</footer>
 </div>
 
 <script>
@@ -496,7 +497,7 @@
   const oldVal = document.getElementById('oldVal');
   const vignetteToggle = document.getElementById('vignetteToggle');
   const lightleakToggle = document.getElementById('lightleakToggle');
-
+  const tiltToggle = document.getElementById('tiltToggle');
 
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(() => render());
@@ -603,10 +604,10 @@
   });
 
   // ---------- Rendering pipeline ----------
-  const FRAME_W = 440;
-  const SIDE_MARGIN = 15;
-  const SPROCKET_H = 25;
-  const CAPTION_H = 150;
+  const FRAME_W = 900;
+  const SIDE_MARGIN = 26;
+  const SPROCKET_H = 34;
+  const CAPTION_H = 215;
   const PHOTO_AREA_W = FRAME_W - SIDE_MARGIN * 2;
   const HOLE_W = 20, HOLE_H = 14, HOLE_GAP = 16;
 
@@ -661,7 +662,7 @@
     const caption = captionInput.value.trim();
     if (caption) {
       ctx.fillStyle = '#0A0A09';
-      ctx.font = '20px "Times New Roman", cursive';
+      ctx.font = '28px "Permanent Marker", cursive';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       const capY = SPROCKET_H + PHOTO_H + SPROCKET_H + CAPTION_H / 2 - 6;
@@ -673,7 +674,7 @@
     ctx.font = '600 12px "IBM Plex Mono", monospace';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'alphabetic';
-    ctx.fillText( frameNumber, FRAME_W - SIDE_MARGIN, FRAME_H - 18);
+    ctx.fillText('FRM ' + frameNumber, FRAME_W - SIDE_MARGIN, FRAME_H - 18);
   }
 
   function drawSprocketStrip(centerY) {
